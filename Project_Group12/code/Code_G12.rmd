@@ -1,0 +1,490 @@
+---
+title: "Project_G12"
+author: "TranThanhQuang_HoangMinhNhat_DoMinhDuc_BuiQuocKiet"
+date: "06/03/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Đề tài : Dự báo thời tiết dựa trên quan sát hằng ngày từ các trạm thời tiết ở Úc
+
+## GVHD : ThS . Quách Đình Hoàng
+
+### Nhóm 12
+
+#### Hoàng Minh Nhật   	19133042
+#### Trần Thành Quang 	19133047
+#### Bùi Quốc Kiệt	    19133030
+#### Đỗ Minh Đức		    19133021
+
+## Báo cáo (Report) gồm 4 phần : 
+### Phần 1 - Giới thiệu
+### Phần 2 - Dữ liệu
+### Phần 3 - Xây dựng mô hình dự đoán
+### Phần 4 - Kết luận
+
+## Phần 1 - Giới thiệu
+- **Tên đề tài** : Weather forecast based on daily weather observations from multiple Australian weather stations .
+- **Tổng quan** : Dự báo thời tiết có một vai trò to lớn trong đời sống kinh tế, xã hội. Dự báo đúng sẽ giúp con người đưa ra những quyết định đúng đắn. 
+- **Mục tiêu** : Dự báo thời tiết ngày tiếp theo ở Úc .
+	Biến kết quả (Y) : RainTomorrow
+- **Nguồn** : Bộ dữ liệu nguồn đến từ Cục Khí tượng Khối thịnh vượng chung Úc. Cục đã cho phép sử dụng dữ liệu với Cục Khí tượng được thừa nhận là nguồn của dữ liệu, theo email từ Cathy Toby (C.Toby@bom.gov.au) thuộc Dịch vụ Thông tin Khí hậu của Trung tâm CLimate Quốc gia, 17 Tháng 12 năm 2008.
+- **Link nguồn** : https://www.rdocumentation.org/packages/rattle/versions/5.4.0/topics/weatherAUS
+
+## Phần 2 - Dữ liệu
+
+- **Tổng quan** : Tập dữ liệu là một khung dữ liệu quan sát hàng ngày từ hơn 45 trạm thời tiết của Úc. Tập dữ liệu có 208395 dòng và có 24 cột .
+
+```{r}
+data = read.csv('weatherAUS.csv')
+head(data)
+```
+
+- **Tóm tắt** về tập dữ liệu : 
+```{r}
+summary(data)
+```
+
+#### Ý nghĩa các biến :
+
+- **Date**: Ngày quan sát (một đối tượng Date).
+- **Location**: Tên thông thường của vị trí của trạm thời tiết.
+- **MinTemp**: Nhiệt độ tối thiểu tính bằng độ C.
+- **MaxTemp**: Nhiệt độ tối đa tính bằng độ C.
+- **Rainfall**: Lượng mưa được ghi lại trong ngày tính bằng mm.
+- **Evaporation** : Cái gọi là độ bốc hơi của chảo loại A (mm) trong 24 giờ đến 9 giờ sáng.
+- **Sunshine** : Số giờ nắng sáng trong ngày.
+- **WindGustDir** : Hướng gió giật mạnh nhất trong 24 giờ  đến nửa đêm.
+- **WindGustSpeed** : Tốc độ (km / h) của gió giật mạnh nhất trong 24 giờ đến nửa đêm.
+- **Temp9am** : Nhiệt độ (độ C) lúc 9 giờ sáng.
+- **RelHumid9am** : Độ ẩm tương đối (phần trăm) lúc 9 giờ sáng.
+- **Cloud9am** : Một phần bầu trời bị mây che khuất lúc 9 giờ sáng. Điều này được đo bằng "oktas", là một đơn vị của eigth. Nó ghi lại bao nhiêu vùng trời bị mây che khuất. Số đo 0 cho biết bầu trời hoàn toàn trong khi số 8 cho biết trời hoàn toàn u ám.
+- **WindSpeed9am** : Tốc độ gió (km / giờ) trung bình trong 10 phút trước 9 giờ sáng.
+- **Pressure9am** : Áp suất khí quyển (hpa) giảm xuống mức trung bình của mực nước biển lúc 9 giờ sáng.
+- **Temp3pm** : Nhiệt độ (độ C) lúc 3 giờ chiều.
+- **RelHumid3pm** : Độ ẩm tương đối (phần trăm) lúc 3 giờ chiều.
+- **Cloud3pm** : Một phần bầu trời bị mây che khuất (trong "oktas": phần tám) lúc 3 giờ chiều. Xem Cload9am để biết mô tả về các giá trị.
+- **WindSpeed3pm** : Tốc độ gió (km / giờ) trung bình trong 10 phút trước 3 giờ chiều.
+- **Pressure3pm** : Áp suất khí quyển (hpa) giảm xuống mức trung bình của mực nước biển lúc 3 giờ chiều.
+- **ChangeTemp** : Thay đổi nhiệt độ.
+- **ChangeTempDir** : Hướng thay đổi của nhiệt độ.
+- **ChangeTempMag** : Độ lớn của sự thay đổi của nhiệt độ.
+- **ChangeWindDirect** : Hướng gió thay đổi.
+- **MaxWindPeriod** : Thời kỳ gió cực đại.
+- **RainToday** : Số nguyên: 1 nếu lượng mưa (mm) trong 24 giờ đến 9 giờ sáng vượt quá 1 mm, nếu không thì 0.
+- **TempRange** : Sự khác biệt giữa nhiệt độ tối thiểu và tối đa (độ C) trong 24 giờ đến 9 giờ sáng.
+- **PressureChange** : Thay đổi áp suất.
+- **RISK_MM** : Lượng mưa. Một loại thước đo "rủi ro".
+- **RainTomorrow** : Biến mục tiêu. Ngày mai trời có mưa không?
+
+#### Thư viện
+```{r}
+library(Amelia)
+library(sqldf)
+library(tidyr)
+library(readr)
+library(dplyr)
+library(party)
+library(caret)
+library(ggplot2)
+library(e1071)
+library("randomForest")
+
+```
+
+
+#### load dữ liệu
+```{r cars}
+df <- read.csv("weatherAUS.csv")
+head(df)
+summary(df)
+nrow(df)
+```
+
+#### Liệt kê tổng số NA của từng biến
+```{r}
+sapply(df,function(x) sum(is.na(x)))
+```
+
+#### Trực quan hóa các giá trị Missing
+```{r}
+missmap(df, main = "Missing values vs observed")
+```
+
+#### Sắp xếp tập dữ liệu tăng dần theo biến "DATE" và hiển thị vài dòng sau khi sắp xếp
+```{r}
+df <- sqldf('select * from df order by Date ASC')
+head(df)
+```
+
+#### Loại bỏ các giá trị Missing và chuẩn hóa hai biến "Pressure9am" và "Pressure3am" theo log
+```{r}
+df <- df[complete.cases(df),] # loại bỏ các giá trị missing value
+df$Pressure9am <- log(df$Pressure9am) #Normalization 
+df$Pressure3pm <- log(df$Pressure3pm)
+```
+
+
+#### Chuyển một số biến sang kiểu factor
+```{r}
+df$RainTomorrow <- as.factor(df$RainTomorrow)
+df$RainToday <- as.factor((df$RainToday))
+df$WindDir3pm <- as.factor(df$WindDir3pm)
+df$WindDir9am <- as.factor(df$WindDir9am)
+df$WindGustDir <- as.factor(df$WindGustDir)
+df$Location <- as.factor(df$Location)
+```
+
+
+#### Loại bỏ cột 23 là biến lượng mưa vì không phù hợp để làm biến dự đoán
+```{r}
+df<- df[,-23]
+head(df)
+```
+
+
+#### Kiểm tra dữ liệu đã được sắp xếp và kiểu dữ liệu đã được chuyển đổi
+```{r}
+glimpse(df)
+```
+
+#### Kiểm tra số lượng Missing value còn trong tập dữ liệu
+```{r}
+numdf <- select_if(df, is.numeric)
+sum(is.na(numdf))
+```
+
+#### Tìm ra một số biến có độ tương quan cao 
+```{r}
+corrplot::corrplot(cor(numdf), method = "number", type = "lower")
+```
+
+#### Tiến hành loại bỏ một số biến có độ tương quan cao hoặc không phù hợp
+```{r}
+df <- df[,- c(1,2,17,20,21)]
+head(df)
+```
+
+
+#### Vẽ biểu đồ thể hiện sự chênh lệch giữa hai nhãn "Yes" và "No" của biến kết quả
+```{r}
+yes <- 0
+no <- 0
+for (i in c(1:nrow(df))) {
+  if(df$RainTomorrow[i]=="Yes")
+    yes<- yes +1 
+  else
+    no <- no +1
+}
+SL <- c(yes,no)
+lable <- c('yes','no')
+c <- data.frame(SL,lable)
+#library(ggplot2)
+ggplot(data = c,aes(lable,SL,fill=lable)) + geom_col() + theme_minimal()
+```
+
+#### Phân chia tập dữ liệu thành 2 phần : Train(80%) và Test(20%) . Phân chia theo thứ tự DATE đã được sắp xếp.
+```{r}
+tam <-df
+k <- c(1:round(nrow(df)*0.8))
+data_train <- df[k,]
+data_test <- df[-k,]
+nrow(data_train)
+nrow(data_test)
+```
+
+
+#### In ra vài dòng đầu của tập Train và Test
+```{r}
+head(data_train)
+head(data_test)
+```
+
+
+## Phần 3 - Xây dựng mô hình dự đoán
+### Các thuật toán nhóm sử dụng
+#### 3.1. Decision tree
+#### 3.2. Support Vector Machine
+#### 3.3. Logistic Regression
+#### 3.4. Random Forest
+#### 3.5. So sánh kết quả của các model
+
+### Viết các hàm đánh giá mô hình
+
+#### Confussion Matrix
+```{r}
+conm <- function(predicted,accuraty)
+{
+  return(table(predicted,accuraty))
+}
+```
+
+
+#### Các độ đo : accuraty , recal , precision , F_measure 
+```{r}
+accuraty <-function(cm){
+  return(sum(diag(cm))/sum(cm))
+}
+recal <- function(cm){
+  return(cm[2,2]/ (cm[2,2] +cm[1,2]))
+}
+precision <- function(cm){
+  return(cm[2,2] / (cm[2,2] +cm[2,1]))
+}
+F_measure <- function(recal1,precision1){
+  return(2*recal1*precision1 / (recal1+precision1))
+}
+```
+
+
+### 3.1 Thuật toán Decision Tree
+
+#### Xem các biến quan trọng 
+```{r}
+#library(caret)
+model_ctree_Important  = train(RainTomorrow ~ ., 
+                data=data_train,
+                method="ctree",
+                trControl=trainControl(method="none")
+                )
+varImp(model_ctree_Important)
+```
+
+#### Tạo model Decision tree
+```{r}
+dtmodel_4 <- ctree(RainTomorrow ~ Sunshine + Humidity3pm + Cloud3pm + Cloud9am + Rainfall + Humidity9am + Pressure9am
+                   + RainToday + WindGustSpeed + Evaporation, data = data_train)
+```
+
+
+#### Dự đoán trên train
+```{r}
+predicted_dt_4_train <- predict(dtmodel_4, data_train)
+cm_dt_4_train<- conm(predicted_dt_4_train,data_train$RainTomorrow)
+
+```
+
+
+#### Đánh giá kết quả trên tập train (dùng F-measure)
+```{r}
+F_dt_4_train <- F_measure(recal(cm_dt_4_train),precision(cm_dt_4_train))
+F_dt_4_train
+```
+
+
+#### Dự đoán trên tập test
+```{r}
+predicted_dt_4 <- predict(dtmodel_4, data_test)
+```
+
+
+#### Đánh giá kết quả trên tập test 
+```{r}
+cm_dt_4<- conm(predicted_dt_4,data_test$RainTomorrow)
+acc_dt_4<- accuraty(cm_dt_4)
+recal_dt_4<-recal(cm_dt_4)
+prec_dt_4<- precision(cm_dt_4)
+F_dt_4 <- F_measure(recal_dt_4,prec_dt_4)
+DoDo <- c('accuraty','Recal','Precision','F-measure')
+kq_do <- c(acc_dt_4,recal_dt_4,prec_dt_4,F_dt_4)
+kq_dt<- data.frame(DoDo,kq_do)
+kq_dt
+
+```
+
+
+
+### 3.2 Support Vector Machine (SVM)
+
+#### Xây dưng model
+
+```{r}
+#library(e1071)
+#### Kernel "RBF" (radio basis function)
+#model_svm <- svm(RainTomorrow ~ Sunshine + Humidity3pm + Cloud3pm + Cloud9am + Rainfall + Humidity9am + #Pressure9am
+#              + RainToday + WindGustSpeed + Evaporation,data = data_train)
+
+#### Kernel "Linear"
+
+model_svm <- svm(RainTomorrow ~ Sunshine + Humidity3pm + Cloud3pm + Cloud9am + Rainfall + Humidity9am + Pressure9am
+             + RainToday + WindGustSpeed + Evaporation,data = data_train , kernel = "linear")
+
+#### Kernel "Polinomial"
+
+#model_svm <- svm(RainTomorrow ~ Sunshine + Humidity3pm + Cloud3pm + Cloud9am + Rainfall + Humidity9am + #Pressure9am
+#             + RainToday + WindGustSpeed + Evaporation,data = data_train , kernel="polynomial",coef0=1)
+
+#### Kernel "Sigmoid"
+
+#model_svm <- svm(RainTomorrow ~ Sunshine + Humidity3pm + Cloud3pm + Cloud9am + Rainfall + Humidity9am + #Pressure9am
+#             + RainToday + WindGustSpeed + Evaporation,data = data_train,kernel="sigmoid",coef0=1)
+
+
+```
+
+
+#### Dự đoán trên tập train
+```{r}
+predicted_svm_train <- predict(model_svm, data_train)
+cm_svm_train<- conm(predicted_svm_train,data_train$RainTomorrow)
+```
+
+
+#### đánh giá kết quả trên tập train (dùng độ đo F-measure)
+```{r}
+F_svm_train <- F_measure(recal(cm_svm_train),precision(cm_svm_train))
+F_svm_train
+```
+
+####  dự đoán trên tập Test
+```{r}
+predicted_svm <- predict(model_svm, data_test)
+```
+
+
+#### Đánh giá kết quả trên tập Test
+```{r}
+cm_svm <- conm(predicted_svm,data_test$RainTomorrow)
+acc_svm <- accuraty(cm_svm)
+recal_svm<-recal(cm_svm)
+prec_svm<- precision(cm_svm)
+F_svm <- F_measure(recal_svm,prec_svm)
+cm_svm
+DoDo <- c('accuraty','Recal','Precision','F-measure')
+kq_do <- c(acc_svm,recal_svm,prec_svm,F_svm)
+kq_svm<- data.frame(DoDo,kq_do)
+kq_svm
+
+```
+
+#### Một số nhận xét với thuật toán svm :
+- Thuật toán svm có độ phức tạp khá cao , độ chính xác có thể được nâng lên khi tăng cost nhưng cũng đồng nghĩa với việc mất nhiều thời gian và tài nguyên tính toán hơn.
+- Với nhiều dạng dữ liệu khác nhau thì sẽ có kernel (hàm biến đổi đại số) phù hợp với loại dữ liệu đó hơn. có 4 dạng chính với thuật toán SVM trong thư viện e1071 : **Linear** , **Polinomial** , **Sigmoid**, **Ratio basis function**.
+- Thực nghiệm trên tập dữ liệu cho thấy kernel **Ratio basis function** cho độ chính xác cao nhất và F1-score thứ nhì. Kernel **Linear** có F1-score lớn nhất nên được chọn.
+- **Tối ưu** : với kernel **Linear** không có tham số nên cách tối ưu là tăng **cost** tới mức phù hợp , không tăng quá cao vì sẽ bị overfiting trên tập train và kết quả không cao trên tập test. Khi 
+tham số **cost** tăng lên thì model sẽ cố gắng fix các điểm nhiễu , vì thế Margin sẽ giảm.
+- Để mô hình được Generalization hơn thì cost phải nhỏ , khi đó mô hình sẽ đạt được Margin lớn.
+- Tóm lại với **cost** nhỏ thì Margin lớn , độ khái quát cao. với **cost** tăng cao thì độ chính xác tăng lên , Margin giảm , chi phí tăng và tốc độ chậm hơn.
+
+
+### 3.3 Logistic Regression
+```{r}
+model_logic <- glm(RainTomorrow ~ Sunshine + Humidity3pm + Cloud3pm + Cloud9am + Rainfall + Humidity9am + Pressure9am
+                   + RainToday + WindGustSpeed + Evaporation,family=binomial(link='logit'),data=data_train)
+```
+
+
+### Dự đoán trên train
+```{r}
+predicted_logis_train <- predict(model_logic, data_train)
+cm_logis_train<- conm(predicted_svm_train,data_train$RainTomorrow)
+```
+
+
+#### kết quả trên tập train (dùng độ do F-measure)
+```{r}
+F_logis_train <- F_measure(recal(cm_logis_train),precision(cm_logis_train))
+F_logis_train
+```
+
+
+#### Dự đoán logistic trên tập test
+```{r}
+predicted_logis <- predict(model_logic, data_test)
+```
+
+#### Độ đo của Logistic
+```{r}
+cm_logis <- table((data_test$RainTomorrow), predicted_logis > 0.5)
+acc_logis<- accuraty(cm_logis)
+recal_logis<-recal(cm_logis)
+prec_logis<- precision(cm_logis)
+F_logis <- F_measure(recal_logis,prec_logis)
+cm_logis
+DoDo <- c('accuraty','Recal','Precision','F-measure')
+kq_do <- c(acc_logis,recal_logis,prec_logis,F_logis)
+kq_logis<- data.frame(DoDo,kq_do)
+kq_logis
+```
+
+
+
+### 3.4 Random forest
+```{r}
+#library("randomForest")
+model_ranfom <- randomForest(RainTomorrow ~ ., data= data_train)
+```
+
+
+#### Dự đoán trên train
+```{r}
+predicted_random_train <- predict(model_ranfom, data_train)
+cm_random_train<- conm(predicted_random_train,data_train$RainTomorrow)
+```
+
+```{r}
+cm_random_train
+```
+
+
+#### kết quả train
+
+```{r}
+F_random_train <- F_measure(recal(cm_random_train),precision(cm_random_train))
+F_random_train
+```
+
+####  dự đoán random test
+```{r}
+predicted_random <- predict(model_ranfom, data_test)
+```
+
+
+#### Đánh giá kết quả trên tập Test
+```{r}
+cm_random <- conm(predicted_random,data_test$RainTomorrow)
+acc_random <- accuraty(cm_random)
+recal_random<-recal(cm_random)
+prec_random<- precision(cm_random)
+F_random <- F_measure(recal_random,prec_random)
+cm_random
+DoDo <- c('accuraty','Recal','Precision','F-measure')
+kq_do <- c(acc_random,recal_random,prec_random,F_random)
+kq_random<- data.frame(DoDo,kq_do)
+kq_random
+```
+
+
+
+
+### 3.5 So sánh kết quả của các model trên tập Test
+```{r}
+algorithm <- c('decision tree','svm','logistic','random')
+accuraty <- c(acc_dt_4,acc_svm,acc_logis,acc_random)
+recal <- c(recal_dt_4,recal_svm,recal_logis,recal_random)
+precision <- c(prec_dt_4,prec_svm,prec_logis,prec_random)
+F_measure <- c(F_dt_4,F_svm,F_logis,F_random)
+kq <- data.frame(algorithm,accuraty,recal,precision,F_measure)
+kq
+```
+
+
+## Phần 4 : Kết luận
+- SVM có độ phức tạp cao , tốc độ chậm , nhạy cảm với nhiễu.
+- Decission tree tốc độ chậm , độ chính xác chưa cao.
+- Logistic Regression tốc độ nhanh , độ chính xác chưa cao.
+- Random Forest tốc độ nhanh , độ chính xác cao nhất nên là lựa chọn để phát triển .
+
+#### Hướng phát triển đề tài
+
+- Cải thiện phần tiền xử lý dữ liệu
+- Tinh chỉnh các tham số cho các mô hình dự đoán được tốt hơn
+- Tìm hiểu mô hình RNN(LSTM) xử lý dữ liệu chuỗi thời gian.
+
+
+
+
+
