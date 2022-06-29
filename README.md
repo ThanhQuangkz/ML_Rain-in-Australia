@@ -1,8 +1,9 @@
-# Đề tài : Dự báo thời tiết dựa trên quan sát hằng ngày từ các trạm thời tiết ở Úc
+# Đồ án khai phá dữ liệu
+## Đề tài : Dự báo thời tiết dựa trên quan sát hằng ngày từ các trạm thời tiết ở Úc
 ### Nhóm 12
 
-#### Hoàng Minh Nhật 	19133042
-#### Trần Thành Quang 	19133047
+#### Trần Thành Quang	19133047
+#### Hoàng Minh Nhật 	19133042
 #### Bùi Quốc Kiệt	    19133030
 #### Đỗ Minh Đức		    19133021
 
