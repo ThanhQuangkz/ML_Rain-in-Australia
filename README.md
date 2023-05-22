@@ -1,12 +1,5 @@
 # Đồ án khai phá dữ liệu
 ## Đề tài : Dự báo thời tiết dựa trên quan sát hằng ngày từ các trạm thời tiết ở Úc
-### Nhóm 12
-
-#### Trần Thành Quang	19133047
-#### Hoàng Minh Nhật 	19133042
-#### Bùi Quốc Kiệt	    19133030
-#### Đỗ Minh Đức		    19133021
-
 ### Phần 1 - Giới thiệu
 ### Phần 2 - Dữ liệu
 ### Phần 3 - Kế hoạch phân tích dữ liệu
